@@ -13,7 +13,7 @@ bot = telebot.TeleBot('2132142651:AAFFusmPInaOmT5AUJlwU1Uu-3Y2sZfcrD4')
 
 chat_id_director = 1415300064
 chat_id_secretary = 2040375134
-chat_id_assistant = 0
+chat_id_assistant = 777702827
 
 information_for_reference = []
 information_for_record = []
