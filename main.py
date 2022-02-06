@@ -546,7 +546,7 @@ def check_doc(message):  # чтение справок из базы данны�
     record = cursor.fetchall()
     for i in record:
         resume_file = i[1]
-        resume_path = os.path.join(f"справка_{str(i[0])}.docx")
+        resume_path = os.path.join(f"справка{str(i[0])}.docx")
         write_to_file(resume_file, resume_path, i[0])
     num_doc_to_del(message)
 
