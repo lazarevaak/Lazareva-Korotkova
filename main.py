@@ -69,21 +69,21 @@ def entrance(message):  # авторизация пользователей
 
 
 def director_welcome(message):  # приветствие с директором
-    bot.send_message(chat_id_director,
+    bot.send_message(message.chat.id,
                      "Успешный вход в систему директора!",
                      parse_mode='html')
     director_entrance(message)
 
 
 def director_entrance(message):  # выбор дня для просмотра записи к директору
-    bot.send_message(chat_id_director,
+    bot.send_message(message.chat.id,
                      "\nНа какой день Вы хотите посмотреть записи?",
                      parse_mode='html')
     director_function(message)
 
 
 def director_function(message):  # получение дня от директора, на который он хочет посмотреть записи
-    m = bot.send_message(chat_id_director,
+    m = bot.send_message(message.chat.id,
                          text="Корректный ответ:\n22.01.2022")
     bot.register_next_step_handler(m, date_of_recording_analysis)
 
@@ -94,7 +94,7 @@ def date_of_recording_analysis(message):  # вывод записей на вы�
     cursor.execute('SELECT * FROM records WHERE dt = ? ', data)
     results = cursor.fetchall()
     if not results:  # нет записей
-        bot.send_message(chat_id_director,
+        bot.send_message(message.chat.id,
                          "Нет записи на этот день",
                          parse_mode='html')
         director_entrance(message)
@@ -103,12 +103,12 @@ def date_of_recording_analysis(message):  # вывод записей на вы�
         n = 0
         for i in results:  # вывод записей на выбранный день
             n += 1
-            bot.send_message(chat_id_director,
+            bot.send_message(message.chat.id,
                              str(n) + ') Дата: ' + data[0] + '\n    Время: ' + str(i[3]) + '\n    Причина: ' + str(
                                  i[1]),
                              parse_mode='html')
         markup = button.data_analysis_markup()  # узнаем нужно ли удалить запись
-        m = bot.send_message(chat_id_director,
+        m = bot.send_message(message.chat.id,
                              text="Хотите отменить запись?",
                              reply_markup=markup)
         bot.register_next_step_handler(m, director_markup_analysis)
@@ -122,7 +122,7 @@ def director_markup_analysis(message):  # анализ ответа директ
 
 
 def choice_record(message):  # выбор записи для удаления директором
-    m = bot.send_message(chat_id_director,
+    m = bot.send_message(message.chat.id,
                          text="Ответьте на сообщение, которое надо удалить.")
     bot.register_next_step_handler(m, del_record)
 
@@ -138,9 +138,9 @@ def del_record(message):  # удаление записи
         sql_update_query = """DELETE from records where tm = ? and dt = ?"""
         cursor.execute(sql_update_query, (time, data))
         conn.commit()
-        bot.send_message(chat_id_director, text="Удалена.")
+        bot.send_message(message.chat.id, text="Удалена.")
     else:
-        bot.send_message(chat_id_director, text="Неверное действие.")
+        bot.send_message(message.chat.id, text="Неверное действие.")
     director_entrance(message)
 
 
@@ -188,14 +188,14 @@ def function_to_run():  # возвращает записи на сегодня
 
 
 def assistant_welcome(message):  # приветствие с ассистентом
-    bot.send_message(chat_id_assistant,
+    bot.send_message(message.chat.id,
                      "Успешный вход в систему ассистента!",
                      parse_mode='html')
     assistant_functions(message)
 
 
 def assistant_functions(message):  # вывод кнопок с функциями ассистентом
-    m = bot.send_message(chat_id_assistant,
+    m = bot.send_message(message.chat.id,
                          text="Выберите нужную кнопку.",
                          reply_markup=button.assistant_markup())
     bot.register_next_step_handler(m, assistant_function)
@@ -213,7 +213,7 @@ def assistant_function(message):  # выбор функции ассистент
 
 
 def write_actual(message):  # ввод текста актуального
-    m = bot.send_message(chat_id_assistant,
+    m = bot.send_message(message.chat.id,
                          text="Напишите часто задаваемые вам вопросы и ответы на них.",
                          reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, adding_actual)
@@ -224,7 +224,7 @@ def adding_actual(message):  # довабдение актуального в б
     cursor.execute('INSERT INTO news (id, text_new) VALUES (?, ?)', text_actual)
     conn.commit()
     markup = button.actual_markup()
-    m = bot.send_message(chat_id_assistant,
+    m = bot.send_message(message.chat.id,
                          text="Выберите нужную кнопку",
                          reply_markup=markup)
     bot.register_next_step_handler(m, next_actual)
@@ -236,7 +236,7 @@ def next_actual(message):
     elif message.text == "Назад":
         assistant_functions(message)  # возвращение к функциям админа
     else:
-        bot.send_message(chat_id_assistant,
+        bot.send_message(message.chat.id,
                          text="Неверное действие.")
         assistant_functions(message)
 
@@ -248,17 +248,17 @@ def del_actual(message):  # вывод актуального для удале�
     cursor.execute('SELECT text_new FROM news')
     results = cursor.fetchall()
     if not results:  # нет актуального в базе данных
-        bot.send_message(chat_id_assistant,
+        bot.send_message(message.chat.id,
                          text="Пусто в актуальном.")
         assistant_function(message)
     else:  # есть актуальное в базе данных
         for i in results:
-            bot.send_message(chat_id_assistant, i, parse_mode='html')
+            bot.send_message(message.chat.id, i, parse_mode='html')
         answer_to_del(message)
 
 
 def answer_to_del(message):  # выбор актуального для удаления
-    m = bot.send_message(chat_id_assistant,
+    m = bot.send_message(message.chat.id,
                          text='Ответьте на сообщение, которое надо удалить.'
                               '\nЕсли Вы не хотите удалять актуальное, '
                               '\nнапишите слово "Назад".')
@@ -275,18 +275,18 @@ def removal_actual(message):  # удаление выбранного актуа
             sql_update_query = """DELETE from news where text_new = ?"""
             cursor.execute(sql_update_query, (t,))
             conn.commit()
-            bot.send_message(chat_id_assistant,
+            bot.send_message(message.chat.id,
                              text="Удалена.")
             assistant_functions(message)  # возвращает в функции админа
         else:
-            m = bot.send_message(chat_id_assistant,
+            m = bot.send_message(message.chat.id,
                                  text="Выберите нужную кнопку.",
                                  reply_markup=button.removal_actual_markup())
             bot.register_next_step_handler(m, checking_for_actual)  # вывод кнопок при неверном действии
     elif message.text == "Назад" or message.text == "назад":
         assistant_functions(message)
     else:
-        m = bot.send_message(chat_id_assistant,
+        m = bot.send_message(message.chat.id,
                              text="Выберите нужную кнопку",
                              reply_markup=button.removal_actual_markup())
         bot.register_next_step_handler(m, checking_for_actual)  # вывод кнопок при неверном действии
@@ -551,11 +551,15 @@ def check_doc(message):  # чтение справок из базы данны�
     sql_fetch_blob_query = """SELECT * from docs"""
     cursor.execute(sql_fetch_blob_query)
     record = cursor.fetchall()
-    for i in record:
-        resume_file = i[1]
-        resume_path = os.path.join(f"справка{str(i[0])}.docx")
-        write_to_file(resume_file, resume_path, i[0])
-    num_doc_to_del(message)
+    if len(record) == 0:
+        bot.send_message(message.chat.id, text='Нет справок.')
+        functions_secretary(message)
+    else:
+        for i in record:
+            resume_file = i[1]
+            resume_path = os.path.join(f"справка{str(i[0])}.docx")
+            write_to_file(resume_file, resume_path, i[0])
+        num_doc_to_del(message)
 
 
 def num_doc_to_del(message):  # ввод номера справки для удаления
