@@ -94,10 +94,9 @@ def date_of_recording_analysis(message):  # вывод записей на вы�
     cursor.execute('SELECT * FROM records WHERE dt = ? ', data)
     results = cursor.fetchall()
     if not results:  # нет записей
-        bot.send_message(chat_id_director,
-                         "Нет записи на этот день",
-                         parse_mode='html')
-        director_entrance(message)
+        m = bot.send_message(chat_id_director,
+                             text="Нет записи на этот день")
+        bot.register_next_step_handler(m, director_entrance)
     else:  # есть записи
         results.sort(key=sorting)
         n = 0
@@ -170,11 +169,6 @@ def function_to_run():  # возвращает записи на сегодня
             bot.send_message(chat_id_director,
                              str(n) + ') Дата: ' + dt[0] + '\n    Время: ' + str(i[3]) + '\n    Причина: ' + str(i[1]),
                              parse_mode='html')
-        markup = button.data_analysis_markup()  # узнаем нужно ли удалить запись
-        m = bot.send_message(chat_id_director,
-                             text="Хотите отменить запись?",
-                             reply_markup=markup)
-        bot.register_next_step_handler(m, director_markup_analysis)
 
 
 # ассистент
