@@ -681,6 +681,6 @@ def sorting(items):  # сортировка по времени
 
 
 if __name__ == '__main__':
-    schedule.every().day.at("7:00").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
+    schedule.every().day.at("07:00").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
     Thread(target=schedule_checker).start()
     bot.polling(none_stop=True, interval=0)

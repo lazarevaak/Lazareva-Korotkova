@@ -3,3 +3,10 @@
 
 # Ada Library Information
 *.ali
+
+# Database
+*.db
+
+
+# Python binaries
+__pycache__/
