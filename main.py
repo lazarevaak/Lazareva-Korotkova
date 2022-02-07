@@ -176,8 +176,7 @@ def function_to_run():  # возвращает записи на сегодня
                              str(n) + ') Дата: ' + dt[0] + '\n    Время: ' + str(i[3]) + '\n    Причина: ' + str(i[1]),
                              parse_mode='html')
         markup = button.data_analysis_markup()  # узнаем нужно ли удалить запись
-        bot.send_message(chat_id_director,
-                        text="Хотите отменить запись?")
+        bot.send_message(chat_id_director, "Хотите отменить запись?")
         m = bot.send_message(chat_id_director,
                              text="Корректный ответ:\n22.01.2022",
                              reply_markup=markup)
