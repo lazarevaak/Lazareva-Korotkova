@@ -1,4 +1,4 @@
-# [Чат-бот для секретаря](t.me/School_secretary_444_bot)
+# [Чат-бот для секретаря](https://t.me/School_secretary_444_bot)
 
 ## Описание проекта:
 
