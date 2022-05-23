@@ -403,28 +403,41 @@ def time_user_write_1(message):  # получение дня от пользов
 def time_user_write_2(message):  # обработка дня от пользователя, на которую пользователей хочет записаться
     data = list()
     data.append(message.text)
-    cursor.execute('SELECT * FROM records where dt = ?', data)
+    cursor.execute('SELECT * FROM records where dt = ? and user = None', data)
     results = cursor.fetchall()
     if not results:  # проверка наличия времени
         bot.send_message(message.chat.id,
                          text="На выбранный день нет слотов.")
         functions_user(message)
     else:
+        times = [i[2] for i in results]
         for i in results:  # ввывод времени
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
         m = bot.send_message(message.chat.id,
-                             text="Выберите время."
+                             text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
                                   "\nКорректный ответ:"
-                                  "\n00:00-00:00")
-        bot.register_next_step_handler(m, time_user_write_3, message.text)
+                                  "\n00:00-00:00", reply_markup=button.removal_records_markup())
+        bot.register_next_step_handler(m, time_user_write_3, message.text, times)
 
 
-
-def time_user_write_3(message, data): # ввод причины для запси
-    time = message.text
-    m = bot.send_message(message.chat.id,
-                         text="Напишите свое полное имя, должность и причину записи.")
-    bot.register_next_step_handler(m, time_user_write_4, data, time)
+def time_user_write_3(message, data, times): # ввод причины для записи
+    if message.text == 'Назад' or message.text == 'назад':
+        functions_user(message)
+    elif message.text not in times:
+        bot.send_message(message.chat.id,
+                         text="Неверный ввод.")
+        functions_user(message)
+    else:
+        time = message.text
+        try:
+            time = map(int, time.split())
+            m = bot.send_message(message.chat.id,
+                             text="Напишите свое полное имя, должность и причину записи.")
+            bot.register_next_step_handler(m, time_user_write_4, data, time)
+        except:
+            bot.send_message(message.chat.id,
+                             text="Неверный ввод.")
+            functions_user(message)
 
 
 def time_user_write_4(message, data, time): # внесение данных о записи
@@ -523,7 +536,8 @@ def creating_reference(items):  # формирование справки и е�
 def created_reference(message):  # формирование справки и ее заполнение
     creating_reference(information_for_reference)
     bot.send_message(message.chat.id,
-                     'Ваша справка успешна создана!',
+                     'Ваша справка успешна создана!'
+                     '\nЗаберите справку через три рабочих дня.',
                      reply_markup=button.del_buttons())
     functions_user(message)
     forward_dock()
