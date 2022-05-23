@@ -403,7 +403,7 @@ def time_user_write_1(message):  # получение дня от пользов
 def time_user_write_2(message):  # обработка дня от пользователя, на которую пользователей хочет записаться
     data = list()
     data.append(message.text)
-    cursor.execute('SELECT * FROM records where dt = ?', data)
+    cursor.execute('SELECT * FROM records where dt = ? and user is NULL', data)
     results = cursor.fetchall()
     if not results:  # проверка наличия времени
         bot.send_message(message.chat.id,
@@ -411,13 +411,8 @@ def time_user_write_2(message):  # обработка дня от пользов
         functions_user(message)
     else:
         times = []
-        for i in results:
-            if i[-1] == 'None' or i[-1] == None:
-                times.append(i[2])
         for i in results:  # ввывод времени
-            if i[-1] == 'None' or i[-1] == None:
-                times.append(i[2])
-                bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
+            bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
         m = bot.send_message(message.chat.id,
                              text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
                                   "\nКорректный ответ:"
