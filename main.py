@@ -426,15 +426,16 @@ def time_user_write_3(message, data, times): # ввод причины для з
         functions_user(message)
     elif message.text not in times:
         bot.send_message(message.chat.id,
-                         text="Неверный ввод.")
+                         text="Неверный ввод.",  reply_markup=button.del_buttons())
         functions_user(message)
     else:
         time = message.text
         time = map(int, time.split())
         m = bot.send_message(message.chat.id,
-                             text="Напишите свое полное имя, должность и причину записи.")
+                             text="Напишите свое полное имя, должность и причину записи.",
+                             reply_markup=button.del_buttons())
         bot.register_next_step_handler(m, time_user_write_4, data, time)
-            
+
 
 def time_user_write_4(message, data, time): # внесение данных о записи
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
