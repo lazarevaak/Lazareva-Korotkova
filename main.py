@@ -130,14 +130,14 @@ def director_markup_analysis(message, data):# анализ ответа дире
 
 
 def choice_record_dir(message, data):  # выбор записи для удаления директором
-    m = bot.send_message(message.chat.id,
+    m = bot.send_message(chat_id_director,
                          text="Напишите время записи, на которое вы хотите удалить запись.",
                          reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, del_record, data)
 
 
 def choice_record_sec(message, data):  # выбор записи для удаления директором
-    m = bot.send_message(message.chat.id,
+    m = bot.send_message(chat_id_secretary,
                          text="Напишите время записи, на которое вы хотите удалить запись.",
                          reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, del_record, data)
