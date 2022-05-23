@@ -525,7 +525,7 @@ def created_reference(message):  # формирование справки и е
     creating_reference(information_for_reference)
     bot.send_message(message.chat.id,
                      'Ваша справка успешна создана!'
-                     '\nЗаберите справку через три рабочих дня.',
+                     '\nЗаберите справку через три рабочих дня по адресу улица Нижняя Первомайская, дом 14.',
                      reply_markup=button.del_buttons())
     functions_user(message)
     forward_dock()
