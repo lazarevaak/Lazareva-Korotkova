@@ -413,6 +413,7 @@ def time_user_write_2(message):  # обработка дня от пользов
         times = []
         for i in results:  # ввывод времени
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
+            times.append(i[2])
         m = bot.send_message(message.chat.id,
                              text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
                                   "\nКорректный ответ:"
@@ -429,16 +430,11 @@ def time_user_write_3(message, data, times): # ввод причины для з
         functions_user(message)
     else:
         time = message.text
-        try:
-            time = map(int, time.split())
-            m = bot.send_message(message.chat.id,
+        time = map(int, time.split())
+        m = bot.send_message(message.chat.id,
                              text="Напишите свое полное имя, должность и причину записи.")
-            bot.register_next_step_handler(m, time_user_write_4, data, time)
-        except:
-            bot.send_message(message.chat.id,
-                             text="Неверный ввод.")
-            functions_user(message)
-
+        bot.register_next_step_handler(m, time_user_write_4, data, time)
+            
 
 def time_user_write_4(message, data, time): # внесение данных о записи
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
