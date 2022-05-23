@@ -111,7 +111,7 @@ def date_of_recording_analysis(message):  # вывод записей на вы�
             n += 1
             bot.send_message(chat_id_director,
                              '№' + str(n) + '\nДата: ' + data[0] + '\nВремя: ' + str(i[2]) + '\nПричина: ' + str(
-                                 i[0])  + '\n    Записавшийся: ' + str(i[3]),
+                                 i[0])  + '\nЗаписавшийся: ' + str(i[3]),
                              parse_mode='html')
         markup = button.data_analysis_markup()  # узнаем нужно ли удалить запись
         m = bot.send_message(chat_id_director,
@@ -412,11 +412,12 @@ def time_user_write_2(message):  # обработка дня от пользов
         m = bot.send_message(message.chat.id,
                              text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
                                   "\nКорректный ответ:"
-                                  "\n00:00-00:00", reply_markup=button.removal_records_markup())
+                                  "\n00:00-00:00" +
+                                  '\nЕсли вам не подходит это время, напишите "Назад"')
         bot.register_next_step_handler(m, time_user_write_3, message.text)
 
 
-def time_user_write_3(message, data, times): # ввод причины для записи
+def time_user_write_3(message, data): # ввод причины для записи
     if message.text == 'Назад' or message.text == 'назад':
         functions_user(message)
     else:
