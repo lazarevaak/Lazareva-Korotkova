@@ -436,9 +436,16 @@ def time_user_write_3(message, data, times): # ввод причины для з
 def time_user(message, data, time): # внесение данных о записи
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
+    bot.send_message(message.chat.id,
+                     text="Регистрация прошла успешно.")
     sqlite_insert_blob_query = """INSERT INTO records (rs, dt, tm, user) VALUES (?, ?, ?, ?)"""
     data_tuple = (message.text, data, time, message.chat.id)
+    cursor.execute(sqlite_insert_blob_query, data_tuple)
+    bot.send_message(message.chat.id,
+                     text="Регистрация прошла успешно.")
     conn.commit()
+    bot.send_message(message.chat.id,
+                         text="Регистрация прошла успешно.")
     functions_user(message)
 
 
@@ -526,7 +533,7 @@ def created_reference(message):  # формирование справки и е
     creating_reference(information_for_reference)
     bot.send_message(message.chat.id,
                      'Ваша справка успешна создана!'
-                     '\nЗаберите справку через три рабочих дня.',
+                     '\nЗаберите справку через три рабочих дня у секретаря по адресу улица Нижняя первомайская дом 14.',
                      reply_markup=button.del_buttons())
     functions_user(message)
     forward_dock()
