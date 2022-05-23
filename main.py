@@ -407,29 +407,31 @@ def time_user_write_2(message):  # обработка дня от пользов
                          text="На выбранный день нет слотов.")
         functions_user(message)
     else:
+        times = []
         for i in results:  # ввывод времени
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
+            times.append(i[2])
         m = bot.send_message(message.chat.id,
-                             text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
+                             text="Выберите время"
                                   "\nКорректный ответ:"
                                   "\n00:00-00:00" +
-                                  '\nЕсли вам не подходит это время, напишите "Назад"')
-        bot.register_next_step_handler(m, time_user_write_3, message.text)
+                                  '\nЕсли вам не подходит это время, напишите "Назад"', reply_markup=button.del_buttons())
+        bot.register_next_step_handler(m, time_user_write_3, message.text, times)
 
 
-def time_user_write_3(message, data): # ввод причины для записи
-    if message.text == 'Назад' or message.text == 'назад':
-        functions_user(message)
-    else:
+def time_user_write_3(message, data, times): # ввод причины для записи
+    if message.text != 'Назад' and message.text != 'назад' and message.text in times:
         time = message.text
         m = bot.send_message(message.chat.id,
-                             text="Напишите свое полное имя, должность и причину записи.",
-                             reply_markup=button.del_buttons())
+                            text="Напишите свое полное имя, должность и причину записи.",
+                            reply_markup=button.del_buttons())
         bot.register_next_step_handler(m, time_user_write_4, data, time)
+    else:
+        functions_user(message)
+
 
 
 def time_user_write_4(message, data, time): # внесение данных о записи
-    bot.send_message(message.chat.id, message.text)
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
     conn.commit()
