@@ -394,7 +394,7 @@ def my_record(message): # просмотр записей пользовател
 
 def time_user_write_1(message):  # получение дня от пользователя, на которую пользователей хочет записаться
     m = bot.send_message(message.chat.id,
-                         text="На какой день Вы хотите записаться?"
+                         text="На какой день вы хотите записаться?"
                               "\nКорректный ответ:"
                               "\n00.00.0000")
     bot.register_next_step_handler(m, time_user_write_2)
@@ -403,7 +403,7 @@ def time_user_write_1(message):  # получение дня от пользов
 def time_user_write_2(message):  # обработка дня от пользователя, на которую пользователей хочет записаться
     data = list()
     data.append(message.text)
-    cursor.execute('SELECT * FROM records where dt = ? and user = None', data)
+    cursor.execute('SELECT * FROM records where dt = ? and user = NULL', data)
     results = cursor.fetchall()
     if not results:  # проверка наличия времени
         bot.send_message(message.chat.id,
