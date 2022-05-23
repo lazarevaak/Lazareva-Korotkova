@@ -3,10 +3,10 @@ def director():
 
 
 def secretary():
-    return 1415300064
+    return 2040375134
 
 
 def assistant():
-    return 2040375134
+    return 1415300064 
 
 
