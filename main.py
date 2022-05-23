@@ -412,9 +412,10 @@ def time_user_write_2(message):  # обработка дня от пользов
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
             times.append(i[2])
         m = bot.send_message(message.chat.id,
-                             text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
-                                  "\nКорректный ответ:"
-                                  "\n00:00-00:00", reply_markup=button.removal_records_markup())
+                             text='Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты.'
+                                  '\nКорректный ответ:'
+                                  '\n00:00-00:00'
+                                  '\nЕсли вам не подходит время, напишите "Назад"')
         bot.register_next_step_handler(m, time_user_write_3, message.text, times)
 
 
@@ -423,20 +424,17 @@ def time_user_write_3(message, data, times): # ввод причины для з
         functions_user(message)
     elif message.text not in times:
         bot.send_message(message.chat.id,
-                         text="Неверный ввод.",  reply_markup=button.del_buttons())
+                         text="Неверный ввод.")
         functions_user(message)
     else:
         time = message.text
         time = map(int, time.split())
         m = bot.send_message(message.chat.id,
-                             text="Напишите свое полное имя, должность и причину записи.",
-                             reply_markup=button.del_buttons())
-        bot.send_message(message.chat.id, message.text)
+                             text="Напишите свое полное имя, должность и причину записи.")
         bot.register_next_step_handler(m, time_user, data, time)
 
 
 def time_user(message, data, time): # внесение данных о записи
-    bot.send_message(message.chat.id, message.text)
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
     conn.commit()
@@ -734,4 +732,3 @@ if __name__ == '__main__':
     schedule.every().day.at("07:00").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
     Thread(target=schedule_checker).start()
     bot.polling(none_stop=True, interval=0)
-
