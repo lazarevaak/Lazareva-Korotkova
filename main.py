@@ -92,7 +92,8 @@ def director_entrance(message):  # выбор дня для просмотра �
 
 def director_function(message):  # получение дня от директора, на который он хочет посмотреть записи
     m = bot.send_message(chat_id_director,
-                         text="Корректный ответ:\n20.02.2000")
+                         text="Корректный ответ:"
+                              "\n00.00.0000")
     bot.register_next_step_handler(m, date_of_recording_analysis)
 
 
@@ -353,7 +354,7 @@ def dell_record_user_1(message):
     m = bot.send_message(message.chat.id,
                      "Какую запись хотите удалить?"
                      "\nКорректный ответ:"
-                     "\n20.02.2020 18:00-19:00",
+                     "\n00.00.0000 00:00-00:00",
                      parse_mode='html', reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, dell_record_user_2)
 
@@ -395,7 +396,7 @@ def time_user_write_1(message):  # получение дня от пользов
     m = bot.send_message(message.chat.id,
                          text="На какой день Вы хотите записаться?"
                               "\nКорректный ответ:"
-                              "\n20.02.2000")
+                              "\n00.00.0000")
     bot.register_next_step_handler(m, time_user_write_2)
 
 
@@ -412,9 +413,9 @@ def time_user_write_2(message):  # обработка дня от пользов
         for i in results:  # ввывод времени
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
         m = bot.send_message(message.chat.id,
-                             text="Выберите время из предложенных."
+                             text="Выберите время."
                                   "\nКорректный ответ:"
-                                  "\n20.02.2000")
+                                  "\n00:00-00:00")
         bot.register_next_step_handler(m, time_user_write_3, message.text)
 
 
@@ -620,7 +621,7 @@ def adding_time_for_record(message):  # получение информации 
     m = bot.send_message(chat_id_secretary,
                          text="Напишите дату и время, когда возможна запись к директору."
                               "\nПример:"
-                              "\n12.12.2022 18:00-19:00", reply_markup=button.del_buttons())
+                              "\n00.00.0000 00:00-00:00", reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, record_add_time_day)
 
 
@@ -666,9 +667,9 @@ def record_add_time_day(message):
 
 def del_function_rec(message):  # получение дня от директора, на который он хочет посмотреть записи
     m = bot.send_message(message.chat.id,
-                         text="На какой день Вы хотите посмотреть записи?"
+                         text="На какой день вы хотите посмотреть записи?"
                               "\nКорректный ответ:"
-                              "\n20.02.2000", reply_markup=button.del_buttons())
+                              "\n00.00.0000", reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, sec_date_of_recording_analysis)
 
 
