@@ -407,42 +407,34 @@ def time_user_write_2(message):  # обработка дня от пользов
                          text="На выбранный день нет слотов.")
         functions_user(message)
     else:
-        times = []
         for i in results:  # ввывод времени
             bot.send_message(message.chat.id, str(i[2]), parse_mode='html')
-            times.append(i[2])
         m = bot.send_message(message.chat.id,
-                             text='Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты.'
-                                  '\nКорректный ответ:'
-                                  '\n00:00-00:00'
-                                  '\nЕсли вам не подходит время, напишите "Назад"')
-        bot.register_next_step_handler(m, time_user_write_3, message.text, times)
+                             text="Выберите время или нажмите кнопку Назад, если вам не подходят данные слоты."
+                                  "\nКорректный ответ:"
+                                  "\n00:00-00:00", reply_markup=button.removal_records_markup())
+        bot.register_next_step_handler(m, time_user_write_3, message.text)
 
 
 def time_user_write_3(message, data, times): # ввод причины для записи
     if message.text == 'Назад' or message.text == 'назад':
         functions_user(message)
-    elif message.text not in times:
-        bot.send_message(message.chat.id,
-                         text="Неверный ввод.")
-        functions_user(message)
     else:
         time = message.text
         m = bot.send_message(message.chat.id,
-                             text="Напишите свое полное имя, должность и причину записи.")
-        bot.register_next_step_handler(m, time_user, data, time)
+                             text="Напишите свое полное имя, должность и причину записи.",
+                             reply_markup=button.del_buttons())
+        bot.register_next_step_handler(m, time_user_write_4, data, time)
 
 
-def time_user(message, data, time): # внесение данных о записи
+def time_user_write_4(message, data, time): # внесение данных о записи
+    bot.send_message(message.chat.id, message.text)
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
-    bot.send_message(message.chat.id,
-                     text="Регистрация прошла успешно.")
+    conn.commit()
     sqlite_insert_blob_query = """INSERT INTO records (rs, dt, tm, user) VALUES (?, ?, ?, ?)"""
     data_tuple = (message.text, data, time, message.chat.id)
     cursor.execute(sqlite_insert_blob_query, data_tuple)
-    bot.send_message(message.chat.id,
-                     text="Регистрация прошла успешно.")
     conn.commit()
     bot.send_message(message.chat.id,
                          text="Регистрация прошла успешно.")
@@ -533,7 +525,7 @@ def created_reference(message):  # формирование справки и е
     creating_reference(information_for_reference)
     bot.send_message(message.chat.id,
                      'Ваша справка успешна создана!'
-                     '\nЗаберите справку через три рабочих дня у секретаря по адресу улица Нижняя первомайская дом 14.',
+                     '\nЗаберите справку через три рабочих дня.',
                      reply_markup=button.del_buttons())
     functions_user(message)
     forward_dock()
