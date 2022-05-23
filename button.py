@@ -10,6 +10,14 @@ def record_user_markup():
     return markup
 
 
+def removal_records_markup():
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    bt1 = types.KeyboardButton("Назад")
+    markup.add(bt1)
+    return markup
+
+
+
 def user_markup(): # функции обычного пользователя
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     bt1 = types.KeyboardButton("Справка")
