@@ -222,20 +222,10 @@ def as_adding_actual(message):  # довабдение актуального в
     text_actual = (None, message.text)
     cursor.execute('INSERT INTO news (id, text_new) VALUES (?, ?)', text_actual)
     conn.commit()
-    markup = button.actual_markup()
-    m = bot.send_message(chat_id_assistant,
-                         text="Выберите нужную кнопку",
-                         reply_markup=markup)
-    bot.register_next_step_handler(m, next_actual)
+    bot.send_message(chat_id_assistant,
+                    text="Успешно добавлено актуальное.")
+    assistant_functions(message)
 
-
-def next_actual(message):
-    if message.text == "Добавить еще актуальное":
-        write_actual(message)  # возвращение к добавлению актуального админа
-    elif message.text == "Назад":
-        assistant_functions(message)  # возвращение к функциям админа
-    else:
-        assistant_functions(message)
 
 
 def del_actual(message):  # вывод актуального для удаления ассистентом
@@ -255,7 +245,7 @@ def del_actual(message):  # вывод актуального для удале�
 
 
 def answer_to_del(message):  # выбор актуального для удаления
-    m = bot.send_message(message.chat.id,
+    m = bot.send_message(chat_id_assistant,
                          text='Ответьте на сообщение, которое надо удалить.'
                               '\nЕсли не хотите удалять актуальное, напишите слово "Назад".')
     bot.register_next_step_handler(m, removal_actual)
@@ -274,18 +264,8 @@ def removal_actual(message):  # удаление выбранного актуа
             bot.send_message(chat_id_assistant,
                              text="Удалена.")
             assistant_functions(message)  # возвращает в функции админа
-        else:
-            m = bot.send_message(chat_id_assistant,
-                                 text="Выберите нужную кнопку.",
-                                 reply_markup=button.removal_actual_markup())
-            bot.register_next_step_handler(m, checking_for_actual)  # вывод кнопок при неверном действии
     elif message.text == "Назад" or message.text == "назад":
         assistant_functions(message)
-    else:
-        m = bot.send_message(chat_id_assistant,
-                             text="Выберите нужную кнопку",
-                             reply_markup=button.removal_actual_markup())
-        bot.register_next_step_handler(m, checking_for_actual)  # вывод кнопок при неверном действии
 
 
 def checking_for_actual(message):
