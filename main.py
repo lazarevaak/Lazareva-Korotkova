@@ -218,10 +218,10 @@ def write_actual(message):  # ввод текста актуального
     m = bot.send_message(chat_id_assistant,
                          text="Напишите часто задаваемые вам вопросы и ответы на них.",
                          reply_markup=button.del_buttons())
-    bot.register_next_step_handler(m, adding_actual)
+    bot.register_next_step_handler(m, as_adding_actual)
 
 
-def adding_actual(message):  # довабдение актуального в базу данных
+def as_adding_actual(message):  # довабдение актуального в базу данных
     text_actual = (None, message.text)
     cursor.execute('INSERT INTO news (id, text_new) VALUES (?, ?)', text_actual)
     conn.commit()
@@ -564,7 +564,7 @@ def function_secretary(message):  # выбор определенной функ
     if message.text == "Проверка справок":
         check_doc(message)
     elif message.text == "Ввод записи":
-        adding_time_for_record(message)
+        sec_adding_time_for_record(message)
     elif message.text == "Удаление и просмотр записи":
         del_function_rec(message)
     else:
@@ -617,7 +617,7 @@ def num_doc_to_del(message):  # ввод номера справки для уд
     bot.register_next_step_handler(m, del_doc)
 
 
-def adding_time_for_record(message):  # получение информации о актуальном от секретаря
+def sec_adding_time_for_record(message):  # получение информации о актуальном от секретаря
     m = bot.send_message(chat_id_secretary,
                          text="Напишите дату и время, когда возможна запись к директору."
                               "\nПример:"
