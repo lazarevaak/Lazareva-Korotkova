@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# _*_ coding: utf-8 _*_
-
 import schedule
 import telebot
 
@@ -434,12 +431,12 @@ def time_user_write_3(message, data, times): # ввод причины для з
         m = bot.send_message(message.chat.id,
                              text="Напишите свое полное имя, должность и причину записи.",
                              reply_markup=button.del_buttons())
-        bot.register_next_step_handler(m, time_user_write_4, data, time)
+        bot.send_message(message.chat.id, message.text)
+        bot.register_next_step_handler(m, time_user, data, time)
 
 
-def time_user_write_4(message, data, time): # внесение данных о записи
-    bot.send_message(message.chat.id,
-                         message.text)
+def time_user(message, data, time): # внесение данных о записи
+    bot.send_message(message.chat.id, message.text)
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
     conn.commit()
@@ -450,3 +447,291 @@ def time_user_write_4(message, data, time): # внесение данных о �
     bot.send_message(message.chat.id,
                          text="Регистрация прошла успешно.")
     functions_user(message)
+
+
+
+
+def actual(message):  # вывод актуального для обычного пользователя
+    cursor.execute('SELECT text_new FROM news')
+    results = cursor.fetchall()
+    if not results:  # проверка наличия актуального в базе данных
+        bot.send_message(message.chat.id,
+                         text="Пусто в актуальном.")
+    else:
+        for i in results:  # ввывод актуального
+            bot.send_message(message.chat.id, i, parse_mode='html')
+    functions_user(message)  # возвращает в функции обычного пользователя
+
+
+# справка
+
+
+def reference(message):  # ввод имеми для сбора информации для справки
+    dell = telebot.types.ReplyKeyboardRemove()
+    bot.send_message(message.chat.id,
+                     text="Введите нужную информацию для справки:",
+                     reply_markup=dell)
+    m = bot.send_message(message.chat.id,
+                         text="ФИО ребенка полностью:")
+    bot.register_next_step_handler(m, collecting_reference_name)
+
+
+def collecting_reference_name(message):  # считивание имеми для сбора информации для справки
+    global information_for_reference
+    information_for_reference.append(message.text)
+    m = bot.send_message(message.chat.id,
+                         text="Класс обучения:")
+    bot.register_next_step_handler(m, collecting_reference_class)
+
+
+def collecting_reference_class(message):  # ввод даты рождения для сбора информации для справки
+    global information_for_reference
+    information_for_reference.append(message.text)
+    m = bot.send_message(message.chat.id,
+                         text="Дата рождения ребенка:")
+    bot.register_next_step_handler(m, collecting_reference_data)
+
+
+def collecting_reference_data(message):  # считивание даты рождения для сбора информации для справки
+    global information_for_reference
+    information_for_reference.append(message.text)
+    created_reference(message)
+
+
+def creating_reference(items):  # формирование справки и ее заполнение
+    doc = docx.Document('справка.docx')
+    for i in doc.paragraphs:
+        tx = str(i.text)
+        if "%%%" in i.text:
+            tb = str(date.today()).split('-')
+            tb.reverse()
+            tb = '.'.join(tb)
+            tx = tx.replace("%%%", str(tb))
+            i.text = tx
+        if "===" in i.text:
+            tx = tx.replace("===", items[0])
+            i.text = tx
+        if "+++" in i.text:
+            tx = tx.replace("+++", items[2])
+            i.text = tx
+        if "#" in i.text:
+            i.text = tx.replace("#", items[1])
+        if "*" in i.text:
+            dt = str(date.today()).split('-')
+            n = int(dt[0])
+            try:
+                n += (11 - int(items[1].split()[0]))
+                if int(dt[1]) > 8:
+                    n += 1
+                i.text = tx.replace("*", '31.08.' + str(n))
+            except:
+                i.text = tx.replace("*", "Невозможен расчет даты выпуска")
+    doc.save("новая_справка.docx")
+
+
+def created_reference(message):  # формирование справки и ее заполнение
+    creating_reference(information_for_reference)
+    bot.send_message(message.chat.id,
+                     'Ваша справка успешна создана!'
+                     '\nЗаберите справку через три рабочих дня.',
+                     reply_markup=button.del_buttons())
+    functions_user(message)
+    forward_dock()
+
+
+def convert_to_binary_data():  # открытие справки
+    with open('новая_справка.docx', 'rb') as file:
+        blob_data = file.read()
+    return blob_data
+
+
+def forward_dock():  # внесение спарвку в базу данных
+    sqlite_insert_blob_query = """INSERT INTO docs (id, doc) VALUES (?, ?)"""
+    resume = convert_to_binary_data()
+    data_tuple = (None, resume)
+    cursor.execute(sqlite_insert_blob_query, data_tuple)
+    conn.commit()
+
+
+# секретарь
+
+
+def secretary_welcome(message):  # приветствие с секретарем
+    bot.send_message(chat_id_secretary,
+                     "Успешный вход в систему секретаря!",
+                     parse_mode='html')
+    functions_secretary(message)
+
+
+def functions_secretary(message):  # функции секретаря
+    m = bot.send_message(chat_id_secretary,
+                         text="Выберите нужную кнопку",
+                         reply_markup=button.secretary_markup())  # вызов кнопок с функциями секретаря
+    bot.register_next_step_handler(m, function_secretary)
+
+
+def function_secretary(message):  # выбор определенной функции секретаря
+    if message.text == "Проверка справок":
+        check_doc(message)
+    elif message.text == "Ввод записи":
+        sec_adding_time_for_record(message)
+    elif message.text == "Удаление и просмотр записи":
+        del_function_rec(message)
+    else:
+        functions_secretary(message)
+
+
+def write_to_file(data, filename, num):  # чтение справки
+    with open(filename, 'wb') as file:  # открытие справки
+        file.write(data)
+    bot.send_document(chat_id=chat_id_secretary, document=open(f"справка_{str(num)}.docx", 'rb'))  # вывод справки
+
+
+def del_doc(message):  # удаление справки по номеру
+    if message.text == "стоп" or message.text == "Стоп":  # остановление удаления справки
+        functions_secretary(message)
+    else:
+        try:  # удаление из базы данных справки
+            num = int(message.text)
+            sql_update_query = """DELETE from docs where id = ?"""
+            cursor.execute(sql_update_query, (num,))
+            conn.commit()
+            bot.send_message(chat_id_secretary, text='Удалена.')
+        except:  # при ошибки
+            bot.send_message(chat_id_secretary, text='Неверный ввод номера справки.'
+                                                   '\nПопробуйте ещё раз или напишите слово "Стоп".',
+                             reply_markup=button.del_buttons())
+        num_doc_to_del(message)
+
+
+def check_doc(message):  # чтение справок из базы данных
+    sql_fetch_blob_query = """SELECT * from docs"""
+    cursor.execute(sql_fetch_blob_query)
+    record = cursor.fetchall()
+    if len(record) == 0:
+        bot.send_message(chat_id_secretary, text='Нет справок.', reply_markup=button.del_buttons())
+        functions_secretary(message)
+    else:
+        for i in record:
+            resume_file = i[1]
+            resume_path = os.path.join(f"справка_{str(i[0])}.docx")
+            write_to_file(resume_file, resume_path, i[0])
+        num_doc_to_del(message)
+
+
+def num_doc_to_del(message):  # ввод номера справки для удаления
+    m = bot.send_message(chat_id_secretary,
+                         text="Введите номер справки."
+                              '\nЕсли хотите перестать удалять справки, то напишите слово "Стоп".',
+                         reply_markup=button.del_buttons())
+    bot.register_next_step_handler(m, del_doc)
+
+
+def sec_adding_time_for_record(message):  # получение информации о актуальном от секретаря
+    m = bot.send_message(chat_id_secretary,
+                         text="Напишите дату и время, когда возможна запись к директору."
+                              "\nПример:"
+                              "\n00.00.0000 00:00-00:00", reply_markup=button.del_buttons())
+    bot.register_next_step_handler(m, record_add_time_day)
+
+
+def record_add_time_day(message):
+    n = message.text.split()
+    if len(n) == 2:
+        data = n[0].split('.')
+        time = n[1].split('-')
+        if len(data) == 3 and len(time) == 2:
+            start = time[0].split(':')
+            stop = time[1].split(':')
+            if len(start) == 2 and len(stop) == 2:
+                try:
+                    a = map(int, data)
+                    b = map(int, start)
+                    c = map(int, stop)
+                    cursor.execute('SELECT * FROM records WHERE dt = ?  and tm = ?', (n[0], n[1]))
+                    results = cursor.fetchall()
+                    if not results:  # проверка наличия записей в базе данных
+                        sqlite_insert_blob_query = """INSERT INTO records (rs, dt, tm, user) VALUES (?, ?, ?, ?)"""
+                        data_tuple = (None, n[0], n[1], None)
+                        cursor.execute(sqlite_insert_blob_query, data_tuple)
+                        conn.commit()
+                        bot.send_message(chat_id_secretary,
+                                             text="Успешно добавлено.")
+                    else:
+                        bot.send_message(chat_id_secretary,
+                                         text="Уже создан даннный слот.")
+                except:
+                    bot.send_message(chat_id_secretary,
+                                     text="Ошибка ввода.")
+            else:
+                bot.send_message(chat_id_secretary,
+                                 text="Ошибка ввода.")
+        else:
+            bot.send_message(chat_id_secretary,
+                             text="Ошибка ввода.")
+    else:
+        bot.send_message(chat_id_secretary,
+                         text="Ошибка ввода.")
+    functions_secretary(message)
+
+
+def del_function_rec(message):  # получение дня от директора, на который он хочет посмотреть записи
+    m = bot.send_message(message.chat.id,
+                         text="На какой день вы хотите посмотреть записи?"
+                              "\nКорректный ответ:"
+                              "\n00.00.0000", reply_markup=button.del_buttons())
+    bot.register_next_step_handler(m, sec_date_of_recording_analysis)
+
+
+def sec_date_of_recording_analysis(message):  # вывод записей на выбранный директором день
+    data = list()
+    day = message.text
+    data.append(message.text)
+    cursor.execute('SELECT * FROM records WHERE dt = ? ', data)
+    results = cursor.fetchall()
+    if not results:  # нет записей
+        bot.send_message(message.chat.id,
+                         "Нет записи на этот день",
+                         parse_mode='html')
+        if message.chat.id == id.director():
+            director_entrance(message)
+        elif message.chat.id == id.secretary():
+            functions_secretary(message)
+        else:
+            functions_user(message)
+    else:  # есть записи
+        results.sort(key=sorting)
+        n = 0
+        for i in results:  # вывод записей на выбранный день
+            n += 1
+            bot.send_message(message.chat.id,
+                             '№' + str(n) + '\nДата: ' + data[0] + '\nВремя: ' + str(i[2]) + '\nПричина: ' + str(i[0])
+                             + '\nЗаписавшийся: ' + str(i[3]),
+                             parse_mode='html')
+        markup = button.data_analysis_markup()  # узнаем нужно ли удалить запись
+        m = bot.send_message(message.chat.id,
+                             text="Хотите отменить запись?",
+                             reply_markup=markup)
+        bot.register_next_step_handler(m, sec_markup_analysis, day)
+
+
+
+def sec_markup_analysis(message, day):
+    # анализ ответа директора на поребность в удалении записи
+    if message.text == 'Нет':
+        functions_secretary(message)
+    elif message.text == 'Да':
+        choice_record_sec(message, day)  # преходит к выбору записи для удаления
+    else:
+        functions_secretary(message)
+
+
+def sorting(items):  # сортировка по времени
+    return items[2]
+
+
+if __name__ == '__main__':
+    schedule.every().day.at("07:00").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
+    Thread(target=schedule_checker).start()
+    bot.polling(none_stop=True, interval=0)
+
