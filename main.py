@@ -428,16 +428,14 @@ def time_user_write_3(message, data, times): # ввод причины для з
         functions_user(message)
     else:
         time = message.text
-        time = map(int, time.split())
         m = bot.send_message(message.chat.id,
                              text="Напишите свое полное имя, должность и причину записи.")
         bot.register_next_step_handler(m, time_user, data, time)
 
 
-def time_user(message, data, time): # внесение данных о записи
+def time_user(message, data, time): # внесение данных о записи 
     sql_update_query = """DELETE from records where tm = ? and dt = ?"""
     cursor.execute(sql_update_query, (time, data))
-    conn.commit()
     sqlite_insert_blob_query = """INSERT INTO records (rs, dt, tm, user) VALUES (?, ?, ?, ?)"""
     data_tuple = (message.text, data, time, message.chat.id)
     cursor.execute(sqlite_insert_blob_query, data_tuple)
