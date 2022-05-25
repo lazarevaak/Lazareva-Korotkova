@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # _*_ coding: utf-8 _*_
 
+#!/usr/bin/env python
+# _*_ coding: utf-8 _*_
+
 import schedule
 import telebot
 
@@ -86,13 +89,14 @@ def director_welcome(message):  # приветствие с директором
 def director_entrance(message):  # выбор дня для просмотра записи к директору
     bot.send_message(chat_id_director,
                      "Директор, на какой день Вы хотите посмотреть записи?",
+                     reply_markup=button.del_buttons(),
                      parse_mode='html')
     director_function(message)
 
 
 def director_function(message):  # получение дня от директора, на который он хочет посмотреть записи
     m = bot.send_message(chat_id_director,
-                         text="Корректный ответ:\n20.02.2000")
+                         text="Корректный ответ:\n20.02.2000",  reply_markup=button.del_buttons())
     bot.register_next_step_handler(m, date_of_recording_analysis)
 
 
@@ -104,7 +108,7 @@ def date_of_recording_analysis(message):  # вывод записей на вы�
     if not results:  # нет записей
         bot.send_message(chat_id_director,
                          "Нет записи на этот день",
-                         parse_mode='html')
+                         parse_mode='html',  reply_markup=button.del_buttons())
         director_entrance(message)
     else:  # есть записи
         results.sort(key=sorting)
@@ -171,7 +175,7 @@ def function_to_run():  # возвращает записи на сегодня
             bot.send_message(chat_id_director,
                              str(n) + ') Дата: ' + dt[0] + '\n    Время: ' + str(i[3]) + '\n    Причина: ' + str(i[1]),
                              parse_mode='html', reply_markup=button.del_buttons())
-    director_entrance('')        
+    director_entrance('')
 
 
 def del_record(message, data):  # удаление записи
@@ -224,20 +228,12 @@ def adding_actual(message):  # довабдение актуального в б
     text_actual = (None, message.text)
     cursor.execute('INSERT INTO news (id, text_new) VALUES (?, ?)', text_actual)
     conn.commit()
-    markup = button.actual_markup()
-    m = bot.send_message(chat_id_assistant,
-                         text="Выберите нужную кнопку",
-                         reply_markup=markup)
-    bot.register_next_step_handler(m, next_actual)
+    bot.send_message(chat_id_assistant,
+                         text="Успешно добавлена.",
+                         reply_markup=button.del_buttons())
+    assistant_functions(message)
 
 
-def next_actual(message):
-    if message.text == "Добавить еще актуальное":
-        write_actual(message)  # возвращение к добавлению актуального админа
-    elif message.text == "Назад":
-        assistant_functions(message)  # возвращение к функциям админа
-    else:
-        assistant_functions(message)
 
 
 def del_actual(message):  # вывод актуального для удаления ассистентом
@@ -659,22 +655,22 @@ def record_add_time_day(message):
                         cursor.execute(sqlite_insert_blob_query, data_tuple)
                         conn.commit()
                         bot.send_message(chat_id_secretary,
-                                             text="Успешно добавлено.")
+                                             text="Успешно добавлено.", reply_markup=button.del_buttons())
                     else:
                         bot.send_message(chat_id_secretary,
-                                         text="Уже создан даннный слот.")
+                                         text="Уже создан даннный слот.", reply_markup=button.del_buttons())
                 except:
                     bot.send_message(chat_id_secretary,
-                                     text="Ошибка ввода.")
+                                     text="Ошибка ввода.", reply_markup=button.del_buttons())
             else:
                 bot.send_message(chat_id_secretary,
-                                 text="Ошибка ввода.")
+                                 text="Ошибка ввода.", reply_markup=button.del_buttons())
         else:
             bot.send_message(chat_id_secretary,
-                             text="Ошибка ввода.")
+                             text="Ошибка ввода.", reply_markup=button.del_buttons())
     else:
         bot.send_message(chat_id_secretary,
-                         text="Ошибка ввода.")
+                         text="Ошибка ввода.", reply_markup=button.del_buttons())
     functions_secretary(message)
 
 
@@ -695,7 +691,7 @@ def sec_date_of_recording_analysis(message):  # вывод записей на �
     if not results:  # нет записей
         bot.send_message(message.chat.id,
                          "Нет записи на этот день",
-                         parse_mode='html')
+                         parse_mode='html', reply_markup=button.del_buttons())
         if message.chat.id == id.director():
             director_entrance(message)
         elif message.chat.id == id.secretary():
@@ -732,6 +728,9 @@ def sorting(items):  # сортировка по времени
 
 
 if __name__ == '__main__':
-    schedule.every().day.at("09:15").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
+    schedule.every().day.at("07:00").do(function_to_run)  # вызов функции ежедневного напоминания директору о записи
     Thread(target=schedule_checker).start()
     bot.polling(none_stop=True, interval=0)
+
+
+
